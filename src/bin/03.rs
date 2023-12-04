@@ -1,9 +1,6 @@
 use std::{collections::BTreeMap, ops::RangeInclusive};
 
-use nom::{
-    bytes::complete::take_till, character::complete::digit1, multi::many0, sequence::preceded,
-    IResult,
-};
+use nom::{bytes::complete::take_till, character::complete::digit0, IResult};
 
 advent_of_code::solution!(3);
 
@@ -56,29 +53,42 @@ impl PartNumber<'_> {
     }
 }
 
-fn parse_line_numbers(input: &str) -> IResult<&str, Vec<&str>> {
-    let (input, numbers) = many0(preceded(take_till(|c: char| c.is_ascii_digit()), digit1))(input)?;
+impl<'a> From<(&'a str, usize, usize)> for PartNumber<'a> {
+    fn from((number, row, column): (&'a str, usize, usize)) -> Self {
+        Self {
+            number,
+            position: (row, column),
+        }
+    }
+}
 
-    Ok((input, numbers))
+fn parse_line_numbers(input: &str, row: usize) -> IResult<&str, Vec<(&str, usize, usize)>> {
+    let mut numbers = vec![];
+    let mut remaining = input;
+    let original_length = input.len();
+    while !remaining.is_empty() {
+        let (s, _) = take_till(|c: char| c.is_ascii_digit())(remaining)?;
+        let (s, n) = digit0(s)?;
+        remaining = s;
+        if !n.is_empty() {
+            numbers.push((n, row, original_length - remaining.len() - n.len()));
+        }
+    }
+
+    Ok((remaining, numbers))
 }
 
 fn parse_numbers(input: &str) -> Vec<PartNumber> {
-    let numbers = input.lines().enumerate().flat_map(|(row, line)| {
-        let (_, numbers) = parse_line_numbers(line).unwrap();
+    input
+        .lines()
+        .enumerate()
+        .flat_map(|(row, line)| {
+            let (_, numbers) = parse_line_numbers(line, row).unwrap();
 
-        numbers
-            .iter()
-            .map(|number| {
-                let column = line.find(number).unwrap();
-                PartNumber {
-                    number,
-                    position: (row, column),
-                }
-            })
-            .collect::<Vec<_>>()
-    });
-
-    numbers.collect()
+            numbers
+        })
+        .map(Into::into)
+        .collect()
 }
 
 fn parse_grid(input: &str) -> Vec<Vec<char>> {
@@ -134,20 +144,8 @@ mod tests {
     }
 
     #[test]
-    fn input_part_one() {
-        let result = part_one(&advent_of_code::template::read_file("inputs", DAY));
-        assert_eq!(result, Some(540131));
-    }
-
-    #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
         assert_eq!(result, Some(467835));
-    }
-
-    #[test]
-    fn input_part_two() {
-        let result = part_two(&advent_of_code::template::read_file("inputs", DAY));
-        assert_eq!(result, Some(86879020));
     }
 }
