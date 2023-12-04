@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, HashSet};
 
 use nom::{
     bytes::complete::tag,
@@ -13,29 +13,21 @@ advent_of_code::solution!(4);
 #[derive(Debug)]
 struct Card {
     id: u32,
-    winning_numbers: BTreeSet<u32>,
-    owned_numbers: BTreeSet<u32>,
+    winning_numbers: HashSet<u32>,
+    owned_numbers: HashSet<u32>,
 }
 
 impl Card {
     pub fn calculate_points(&self) -> u32 {
-        let mut points = 0;
-
-        for _ in 0..self.calculate_matching_numbers() {
-            if points == 0 {
-                points = 1
-            } else {
-                points *= 2
-            }
+        match self.matching_numbers_count().checked_sub(1) {
+            Some(num) => 2u32.pow(num),
+            None => 0,
         }
-
-        points
     }
 
-    pub fn calculate_matching_numbers(&self) -> u32 {
+    pub fn matching_numbers_count(&self) -> u32 {
         self.owned_numbers
-            .iter()
-            .filter(|number| self.winning_numbers.contains(*number))
+            .intersection(&self.winning_numbers)
             .count() as u32
     }
 }
@@ -79,7 +71,7 @@ pub fn part_two(input: &str) -> Option<u32> {
     let mut copies: BTreeMap<u32, u32> = cards.iter().map(|card| (card.id, 1)).collect();
 
     for card in cards {
-        let copies_won = card.calculate_matching_numbers();
+        let copies_won = card.matching_numbers_count();
         let copies_of_current = *copies.get(&card.id).unwrap();
         for i in (card.id + 1)..=(card.id + copies_won) {
             copies
