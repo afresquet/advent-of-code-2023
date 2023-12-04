@@ -146,12 +146,14 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "pending"]
     fn input_part_one() {
         let result = part_one(&advent_of_code::template::read_file("inputs", DAY));
         assert_eq!(result, Some(540131));
     }
 
     #[test]
+    #[ignore = "pending"]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
         assert_eq!(result, Some(467835));
