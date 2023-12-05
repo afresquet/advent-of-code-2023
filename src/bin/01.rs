@@ -4,14 +4,9 @@ pub fn part_one(input: &str) -> Option<u32> {
     let result = input
         .lines()
         .map(|line| {
-            let mut chars = line.chars();
-            let first = chars
-                .find(|char| char.is_ascii_digit())
-                .expect("No numbers in line");
-            let second = chars
-                .rev()
-                .find(|char| char.is_ascii_digit())
-                .unwrap_or(first);
+            let mut chars = line.chars().filter_map(|c| c.to_digit(10));
+            let first = chars.next().expect("No numbers in line");
+            let second = chars.last().unwrap_or(first);
             format!("{}{}", first, second).parse::<u32>().unwrap()
         })
         .sum();
