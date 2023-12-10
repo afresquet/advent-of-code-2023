@@ -77,7 +77,7 @@ pub fn part_one(input: &str) -> Option<u32> {
     Some(steps as u32)
 }
 
-fn gcd(a: u32, b: u32) -> u32 {
+fn gcd(a: u64, b: u64) -> u64 {
     match (a, b) {
         (0, 0) => 0,
         (a, 0) => a,
@@ -85,11 +85,11 @@ fn gcd(a: u32, b: u32) -> u32 {
     }
 }
 
-fn lcm(a: u32, b: u32) -> u32 {
+fn lcm(a: u64, b: u64) -> u64 {
     (a * b) / gcd(a, b)
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
+pub fn part_two(input: &str) -> Option<u64> {
     let (_, (instructions, nodes)) = parse_document(input).unwrap();
     let starting_nodes = nodes
         .keys()
@@ -110,7 +110,7 @@ pub fn part_two(input: &str) -> Option<u32> {
             }
         }
         println!("{steps}");
-        steps as u32
+        steps as u64
     });
 
     steps_for_nodes.reduce(lcm)
